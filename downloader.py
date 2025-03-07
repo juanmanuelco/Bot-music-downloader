@@ -11,6 +11,7 @@
 
 import os
 from concurrent.futures import ThreadPoolExecutor
+import subprocess
 
 def descargar_video(music):
     
@@ -19,10 +20,23 @@ def descargar_video(music):
     #    " --no-playlist -r 30M --buffer-size 16k --windows-filenames --write-thumbnail --write-subs --extract-audio --audio-format mp3 --keep-video -S res,ext:mp4:m4a"
     #)
 
-    os.system(
-        "yt-dlp.exe " + music + " -f " + 'best[height<1025]+bestvideo[ext=mp4]+bestaudio/best[ext=mp4]/best' +
-        " --no-playlist -r 30M --buffer-size 16k --extract-audio --audio-format mp3 --keep-video -S res,ext:mp4:m4a"
-    )
+    output_template = "%(title)s [%(id)s].%(ext)s"
+
+    output_filename = subprocess.check_output([
+        "yt-dlp2025.exe", "--get-filename", "-o", output_template, music
+    ]).decode("utf-8").strip()
+
+    print("Trying to download: " +output_filename)
+
+    if not os.path.exists(output_filename):
+        print("Downloading: " + output_filename)
+        os.system(
+            "yt-dlp2025.exe " + music + " -f " + 'best[height<1025]+bestvideo[ext=mp4]+bestaudio/best[ext=mp4]/best' +
+            " --no-playlist -r 30M --buffer-size 16k --extract-audio --audio-format mp3 --keep-video -S res,ext:mp4:m4a"
+        )
+    else:
+        print("File already exists: " + output_filename)
+
 
 if __name__ == "__main__":
     with open('links.txt', 'r', encoding='utf-8') as file:
@@ -30,7 +44,7 @@ if __name__ == "__main__":
     music_list = list(set(music_list))
 
     # Número de descargas a ejecutar simultáneamente
-    num_descargas_simultaneas = 20
+    num_descargas_simultaneas = 100
 
     # Utilizar ThreadPoolExecutor para ejecutar en paralelo
     with ThreadPoolExecutor(max_workers=num_descargas_simultaneas) as executor:

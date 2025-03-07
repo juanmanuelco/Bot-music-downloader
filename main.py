@@ -4,22 +4,30 @@ import time
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 import json
+from selenium.webdriver.chrome.service import Service
 
 from selenium.webdriver.support.wait import WebDriverWait
 
-chrome_driver_path = "C:\chromedriver.exe"
-prefs = {"download.default_directory" : "I:\Videos"}
+chrome_driver_path = "C:\\chromedriver.exe"
+prefs = {"download.default_directory" : "I:\\Videos"}
 
 # Leer el archivo musics.txt
 with open('musics.txt', 'r', encoding='utf-8') as file:
     music_list = file.readlines()
 
-# Crear una instancia de Chrome
-driver = webdriver.Chrome(executable_path=chrome_driver_path)
+
+# Specify the path to the Chrome driver
+chrome_driver_path = 'C:\\chromedriver.exe'  # update with your actual path
+
+# Create a Service object
+service = Service(chrome_driver_path)
+
+# Create the WebDriver instance using the Service
+driver = webdriver.Chrome(service=service)
 
 
 driver.get('https://www.youtube.com')
-time.sleep(10)
+time.sleep(5)
 
 # Iterar sobre cada línea en musics.txt
 for indice,  music in enumerate(music_list):
@@ -27,7 +35,7 @@ for indice,  music in enumerate(music_list):
         search_box = driver.find_element('name', 'search_query')
         search_box.clear()
         search_box.send_keys(music + Keys.RETURN)
-        time.sleep(5)
+        time.sleep(2)
 
         first_result = driver.find_elements(By.CSS_SELECTOR ,'.ytd-section-list-renderer #contents #dismissible a#thumbnail')
         video_url = first_result[0].get_attribute('href')
